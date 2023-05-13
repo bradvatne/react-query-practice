@@ -1,7 +1,9 @@
 import useUserData from "@/helpers/useUserData";
-import { Menu, Transition } from "@headlessui/react";
+import Image from "next/image";
+import React, { FC, Fragment, ReactChild } from "react";
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
-import React, { Fragment } from "react";
+import { JsxElement } from "typescript";
+import { useLabelData } from "@/helpers/useLabelData";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -39,6 +41,54 @@ const IssueItem = ({ issue }: { issue: IssueProps }) => {
   } = issue;
   const assigneeInfo = useUserData(assignee);
   const createdByInfo = useUserData(createdBy);
+
+  const getColorClass = (color: string) => {
+    console.log(color);
+    switch (color) {
+      case "blue":
+        return "sky";
+      case "cyan":
+        return "cyan";
+      case "orange":
+        return "orange";
+      case "lime":
+        return "green";
+      case "white":
+        return "slate";
+      case "rebeccapurple":
+        return "indigo";
+      case "red":
+        return "red";
+      default:
+        return "";
+    }
+  };
+
+  const Label: any = ({
+    label,
+    children,
+  }: {
+    label: Label;
+    children: JsxElement;
+  }) => {
+    const labelsQuery = useLabelData();
+    if (labelsQuery.isLoading) return null;
+    const labelObj = labelsQuery?.data?.find(
+      (queryLabel: any) => queryLabel.id == label
+    );
+    console.log(labelObj);
+    if (!labelObj) return null;
+
+    return (
+      <p
+        key={label.id}
+        className={`rounded-md  whitespace-nowrap mt-0.5 px-1.5 py-0.5 text-xxs font-medium ring-${getColorClass(labelObj.color)}-100 ring-1 ring-inset bg-${getColorClass(labelObj.color)}-300`}
+      >
+        {labelObj.id}
+      </p>
+    );
+  };
+
   return (
     <li
       key={id}
@@ -49,9 +99,12 @@ const IssueItem = ({ issue }: { issue: IssueProps }) => {
           <p className="text-sm font-semibold leading-6 text-gray-900">
             {title}
           </p>
-          <p className="rounded-md whitespace-nowrap mt-0.5 px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset">
-            {status}
-          </p>
+
+          {labels.map((label) => (
+            <Label key={parseInt(label.id)} label={label}>
+              {label.name}
+            </Label>
+          ))}
         </div>
         <div className="mt-1 flex items-center text-xs leading-5 text-gray-500">
           <p className="truncate">
@@ -67,72 +120,21 @@ const IssueItem = ({ issue }: { issue: IssueProps }) => {
         </div>
       </div>
       <div className="flex flex-none items-center gap-x-4">
-        <a
-          href={`/${title}`}
-          className="hidden rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:block"
-        >
-          View issue<span className="sr-only">, {title}</span>
-        </a>
-        <Menu as="div" className="relative flex-none">
-          <Menu.Button className="-m-2.5 block p-2.5 text-gray-500 hover:text-gray-900">
-            <span className="sr-only">Open options</span>
-            <ChatBubbleLeftEllipsisIcon
-              className="h-5 w-5"
-              aria-hidden="true"
-            />
-          </Menu.Button>
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-100"
-            enterFrom="transform opacity-0 scale-95"
-            enterTo="transform opacity-100 scale-100"
-            leave="transition ease-in duration-75"
-            leaveFrom="transform opacity-100 scale-100"
-            leaveTo="transform opacity-0 scale-95"
-          >
-            <Menu.Items className="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
-              <Menu.Item>
-                {({ active }) => (
-                  <a
-                    href="#"
-                    className={classNames(
-                      active ? "bg-gray-50" : "",
-                      "block px-3 py-1 text-sm leading-6 text-gray-900"
-                    )}
-                  >
-                    Edit<span className="sr-only">, {title}</span>
-                  </a>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <a
-                    href="#"
-                    className={classNames(
-                      active ? "bg-gray-50" : "",
-                      "block px-3 py-1 text-sm leading-6 text-gray-900"
-                    )}
-                  >
-                    Move<span className="sr-only">, {title}</span>
-                  </a>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <a
-                    href="#"
-                    className={classNames(
-                      active ? "bg-gray-50" : "",
-                      "block px-3 py-1 text-sm leading-6 text-gray-900"
-                    )}
-                  >
-                    Delete<span className="sr-only">, {title}</span>
-                  </a>
-                )}
-              </Menu.Item>
-            </Menu.Items>
-          </Transition>
-        </Menu>
+        {assigneeInfo?.data?.profilePictureUrl && (
+          <Image
+            height={24}
+            width={24}
+            className="rounded-full shadow-sm"
+            alt={assigneeInfo?.data?.name}
+            src={assigneeInfo?.data?.profilePictureUrl ?? "/blank_profile.webp"}
+          />
+        )}
+        <div className="flex flex-col justify-center items-center gap-1">
+          <div className="w-[16px] h-[16px] text-gray-500">
+            <ChatBubbleLeftEllipsisIcon />
+          </div>
+          <span className="text-xxs"></span>
+        </div>
       </div>
     </li>
   );
