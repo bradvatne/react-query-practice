@@ -9,31 +9,16 @@ import {
 } from "@heroicons/react/24/outline";
 import { Fragment, useState } from "react";
 import { useQuery, UseQueryResult } from "react-query";
+import { Label, Tab } from "../../types";
+import { classNames, capitalizeFirstLetter } from "@/helpers/utils";
 
-//import useQueory return type
-
-const tabs = [
-  { name: "Open", href: "#", current: true },
-  { name: "Closed", href: "#", current: false },
-];
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
-type Tab = {
-  id: string;
-  name: string;
-  color: string;
-};
-
-//function to capitalize first letter of string
-
-function capitalizeFirstLetter(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-export default function Header() {
+export default function Header({
+  selected,
+  toggle,
+}: {
+  selected: Label[];
+  toggle: Function;
+}) {
   const [currentTab, setCurrentTab] = useState<string | undefined>(undefined);
   const tabsQuery = useQuery(["tabs"], () => {
     return fetch("https://ui.dev/api/courses/react-query/labels").then((res) =>

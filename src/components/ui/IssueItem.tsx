@@ -4,85 +4,28 @@ import React, { FC, Fragment, ReactChild } from "react";
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
 import { JsxElement } from "typescript";
 import { useLabelData } from "@/helpers/useLabelData";
-
-function classNames(...classes: any) {
-  return classes.filter(Boolean).join(" ");
-}
-
-interface IssueProps {
-  id: string;
-  title: string;
-  number: number;
-  status: string;
-  assignee: string;
-  comments: string[];
-  createdBy: string;
-  createdDate: Date;
-  labels: Label[];
-}
-
-export interface Label {
-  id: string;
-  name: string;
-  color: string;
-}
+import { IssueProps, Label } from "../../../types";
+import { getColorClass } from "@/helpers/utils";
 
 const IssueItem = ({ issue }: { issue: IssueProps }) => {
-  const {
-    id,
-    title,
-    number,
-    status,
-    assignee,
-    comments,
-    createdBy,
-    createdDate,
-    labels,
-  } = issue;
+  const { id, title, assignee, createdBy, createdDate, labels } = issue;
   const assigneeInfo = useUserData(assignee);
   const createdByInfo = useUserData(createdBy);
 
-  const getColorClass = (color: string) => {
-    console.log(color);
-    switch (color) {
-      case "blue":
-        return "sky";
-      case "cyan":
-        return "cyan";
-      case "orange":
-        return "orange";
-      case "lime":
-        return "green";
-      case "white":
-        return "slate";
-      case "rebeccapurple":
-        return "indigo";
-      case "red":
-        return "red";
-      default:
-        return "";
-    }
-  };
-
-  const Label: any = ({
-    label,
-    children,
-  }: {
-    label: Label;
-    children: JsxElement;
-  }) => {
+  const Label: any = ({ label }: { label: Label }) => {
     const labelsQuery = useLabelData();
     if (labelsQuery.isLoading) return null;
     const labelObj = labelsQuery?.data?.find(
       (queryLabel: any) => queryLabel.id == label
     );
-    console.log(labelObj);
     if (!labelObj) return null;
+
+    const bg = getColorClass(labelObj.color);
 
     return (
       <p
         key={label.id}
-        className={`rounded-md  whitespace-nowrap mt-0.5 px-1.5 py-0.5 text-xxs font-medium ring-${getColorClass(labelObj.color)}-100 ring-1 ring-inset bg-${getColorClass(labelObj.color)}-300`}
+        className={`rounded-md  whitespace-nowrap mt-0.5 px-1.5 py-0.5 text-xxs shadow-sm font-medium bg-slate-100 ring-slate-200 ring-1 ring-inset`}
       >
         {labelObj.id}
       </p>
@@ -101,7 +44,11 @@ const IssueItem = ({ issue }: { issue: IssueProps }) => {
           </p>
 
           {labels.map((label) => (
-            <Label key={parseInt(label.id)} label={label}>
+            <Label
+              key={parseInt(label.id)}
+              label={label}
+              color={getColorClass(label.color)}
+            >
               {label.name}
             </Label>
           ))}

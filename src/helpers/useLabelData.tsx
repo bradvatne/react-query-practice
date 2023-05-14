@@ -6,6 +6,6 @@ export const useLabelData = () => {
       res.json()
     )
   );
-  console.log(labelQuery.data)
+
   return labelQuery;
 };
